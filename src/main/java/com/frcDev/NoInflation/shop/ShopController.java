@@ -49,7 +49,7 @@ public class ShopController {
         boolean deleted = shopService.deleteShopById(id);
         if (deleted)
             return new ResponseEntity<>("Shop deleted successfully", HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("Shop not found",HttpStatus.NOT_FOUND);
     }
 
 

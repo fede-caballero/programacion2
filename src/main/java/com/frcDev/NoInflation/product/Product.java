@@ -1,5 +1,7 @@
 package com.frcDev.NoInflation.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.frcDev.NoInflation.shop.Shop;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,6 +15,9 @@ public class Product {
     private Double price;
     private String location;
 
+
+    @ManyToOne
+    private Shop shop;
     public Product() {
     }
 
@@ -22,6 +27,7 @@ public class Product {
         this.description = description;
         this.price = price;
         this.location = location;
+
     }
 
     public Long getId() {
@@ -62,5 +68,13 @@ public class Product {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    public Shop getShop() {
+        return shop;
+    }
+
+    public void setShop(Shop shop) {
+        this.shop = shop;
     }
 }

@@ -1,5 +1,6 @@
 package com.frcDev.NoInflation.shop;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.frcDev.NoInflation.product.Product;
 import jakarta.persistence.*;
 
@@ -13,7 +14,8 @@ public class Shop {
     private String shopName;
     private String description;
 
-    @OneToMany
+    @JsonIgnore
+    @OneToMany(mappedBy = "shop")
     private List<Product> products;
 
     //private List<Price> prices;
@@ -44,6 +46,14 @@ public class Shop {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<Product> getProducts() {
+        return products;
+    }
+
+    public void setProducts(List<Product> products) {
+        this.products = products;
     }
 }
 
