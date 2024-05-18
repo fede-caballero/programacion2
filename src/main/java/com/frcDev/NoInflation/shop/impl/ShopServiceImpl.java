@@ -26,7 +26,7 @@ public class ShopServiceImpl implements ShopService {
         if (shopOptional.isPresent()) {
             Shop shopToUpdate = shopOptional.get();
             shopToUpdate.setShopName(updatedShop.getShopName());
-            shopToUpdate.setDescription(updatedShop.getDescription());
+            shopToUpdate.setLocation(updatedShop.getLocation());
             shopRepository.save(shopToUpdate);
             return true;
         }

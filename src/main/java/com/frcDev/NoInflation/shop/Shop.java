@@ -12,7 +12,7 @@ public class Shop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String shopName;
-    private String description;
+    private String location;
 
     @JsonIgnore
     @OneToMany(mappedBy = "shop")
@@ -40,12 +40,12 @@ public class Shop {
         this.shopName = shopName;
     }
 
-    public String getDescription() {
-        return description;
+    public String getLocation() {
+        return location;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setLocation(String description) {
+        this.location = description;
     }
 
     public List<Product> getProducts() {
