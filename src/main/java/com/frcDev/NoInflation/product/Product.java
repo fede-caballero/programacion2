@@ -1,41 +1,48 @@
 package com.frcDev.NoInflation.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.frcDev.NoInflation.shop.Shop;
+import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
 
 @Entity
-//@Table(name = "product_table")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long productId;
     private String productName;
     private String description;
     private Double price;
     private String location;
 
+    @ManyToOne
+    @JoinColumn(name = "shopping_list_id")
+    private ShoppingList shoppingList;
 
     @ManyToOne
+    @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
+
+    // Default constructor
     public Product() {
     }
 
-    public Product(Long id, String productName, String description, Double price, String location) {
-        this.id = id;
+    // Constructor with parameters
+    public Product(Long productId, String productName, String description, Double price, String location, Shop shop) {
+        this.productId = productId;
         this.productName = productName;
         this.description = description;
         this.price = price;
         this.location = location;
-
+        this.shop = shop;
     }
 
-    public Long getId() {
-        return id;
+    // Getters and Setters
+    public Long getProductId() {
+        return productId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setProductId(Long productId) {
+        this.productId = productId;
     }
 
     public String getProductName() {

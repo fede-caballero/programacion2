@@ -1,41 +1,44 @@
 package com.frcDev.NoInflation.user;
 
-import com.frcDev.NoInflation.cart.Cart;
+import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
     private String name;
     private String email;
     private String password;
     private String role;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Cart cart;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ShoppingList> shoppingLists;
 
-    public User(){
-
+    public User() {
+        // Constructor por defecto
     }
 
     public User(Long id, String name, String email, String password, String role) {
-        this.id = id;
+        this.userId = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
+    // Getters y setters
 
-    public Long getId() {
-        return id;
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUserId(Long id) {
+        this.userId = id;
     }
 
     public String getName() {
@@ -70,11 +73,11 @@ public class User {
         this.role = role;
     }
 
-    public Cart getCart() {
-        return cart;
+    public List<ShoppingList> getShoppingLists() {
+        return shoppingLists;
     }
 
-    public void setCart(Cart cart) {
-        this.cart = cart;
+    public void setShoppingList(List<ShoppingList> shoppingLists) {
+        this.shoppingLists = shoppingLists;
     }
 }

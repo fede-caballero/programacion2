@@ -15,11 +15,12 @@ public class Shop {
     private String location;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "shop")
+    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
 
     //private List<Price> prices;
 
+    //Constructor por defecto
     public Shop() {
 
     }
