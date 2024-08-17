@@ -1,7 +1,5 @@
 package com.frcDev.NoInflation.user;
-
-
-import org.apache.coyote.Response;
+import com.frcDev.NoInflation.dto.UserLoginDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -52,4 +50,19 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody User user) {
+        userService.registerUser(user);
+        return ResponseEntity.ok("User registered successfully");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody UserLoginDto loginDto) {
+        boolean isAuthenticated = userService.loginUser(loginDto);
+        if (isAuthenticated) {
+            return ResponseEntity.ok("Login successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+    }
 }

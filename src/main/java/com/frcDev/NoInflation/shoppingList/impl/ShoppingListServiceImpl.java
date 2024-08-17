@@ -1,4 +1,5 @@
 package com.frcDev.NoInflation.shoppingList.impl;
+
 import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import com.frcDev.NoInflation.shoppingList.ShoppingListRepository;
 import com.frcDev.NoInflation.shoppingList.ShoppingListService;
@@ -24,6 +25,11 @@ public class ShoppingListServiceImpl implements ShoppingListService {
     }
 
     @Override
+    public List<ShoppingList> getAllShoppingListsByUser(Long userId) {
+        return shoppingListRepository.findByUserId(userId); // Debes implementar este método en el repositorio
+    }
+
+    @Override
     public void createShoppingList(ShoppingList shoppingList) {
         shoppingListRepository.save(shoppingList);
     }
@@ -34,8 +40,13 @@ public class ShoppingListServiceImpl implements ShoppingListService {
     }
 
     @Override
-    public boolean updateShoppingList(ShoppingList shoppingList, Long shoppingListId) {
-        Optional<ShoppingList> existingShoppingList = shoppingListRepository.findById(shoppingListId);
+    public ShoppingList getShoppingListByIdAndUser(Long shoppingListId, Long userId) {
+        return shoppingListRepository.findByIdAndUserId(shoppingListId, userId).orElse(null); // Debes implementar este método en el repositorio
+    }
+
+    @Override
+    public boolean updateShoppingList(ShoppingList shoppingList, Long shoppingListId, Long userId) {
+        Optional<ShoppingList> existingShoppingList = shoppingListRepository.findByIdAndUserId(shoppingListId, userId);
         if (existingShoppingList.isPresent()) {
             ShoppingList updatedList = existingShoppingList.get();
             updatedList.setListName(shoppingList.getListName());
@@ -47,11 +58,20 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         }
     }
 
-
     @Override
     public boolean deleteShoppingListById(Long shoppingListId) {
         if (shoppingListRepository.existsById(shoppingListId)) {
             shoppingListRepository.deleteById(shoppingListId);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean deleteShoppingListByIdAndUser(Long shoppingListId, Long userId) {
+        Optional<ShoppingList> shoppingList = shoppingListRepository.findByIdAndUserId(shoppingListId, userId);
+        if (shoppingList.isPresent()) {
+            shoppingListRepository.delete(shoppingList.get());
             return true;
         }
         return false;

@@ -1,5 +1,6 @@
 package com.frcDev.NoInflation.shoppingList;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.frcDev.NoInflation.product.Product;
 import com.frcDev.NoInflation.product.ProductController;
 import jakarta.persistence.*;
@@ -19,6 +20,7 @@ public class ShoppingList {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private User user;
 
     @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -67,4 +69,11 @@ public class ShoppingList {
         this.items = items;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }

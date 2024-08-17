@@ -1,5 +1,6 @@
 package com.frcDev.NoInflation.user;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
 
@@ -10,13 +11,14 @@ import java.util.List;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long id;
     private String name;
     private String email;
     private String password;
     private String role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<ShoppingList> shoppingLists;
 
     public User() {
@@ -24,7 +26,7 @@ public class User {
     }
 
     public User(Long id, String name, String email, String password, String role) {
-        this.userId = id;
+        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
@@ -34,11 +36,11 @@ public class User {
     // Getters y setters
 
     public Long getUserId() {
-        return userId;
+        return id;
     }
 
     public void setUserId(Long id) {
-        this.userId = id;
+        this.id = id;
     }
 
     public String getName() {
