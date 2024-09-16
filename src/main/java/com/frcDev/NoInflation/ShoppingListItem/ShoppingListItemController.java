@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/shoppinglists/{shoppingListId}/items")
+@RequestMapping("/api/shoppinglists/{shoppingListId}/items")
 public class ShoppingListItemController {
     private final ShoppingListItemService shoppingListItemService;
 

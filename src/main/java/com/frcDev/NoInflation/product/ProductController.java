@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/api/products")
 public class ProductController {
     ProductService productService;
 
@@ -19,6 +19,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.findAll());
     }
 
+    @CrossOrigin(origins = "http://localhost:8081")
     @PostMapping
     public ResponseEntity<String> createProduct(@RequestBody Product product){
         productService.createProduct(product);

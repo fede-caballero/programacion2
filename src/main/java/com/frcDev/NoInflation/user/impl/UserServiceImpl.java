@@ -27,11 +27,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void createUser(User user) {
-        userRepository.save(user);
-    }
-
-    @Override
     public User getUserById(Long id) {
         return userRepository.findById(id).orElse(null);
     }
@@ -44,7 +39,7 @@ public class UserServiceImpl implements UserService {
             user.setName(updatedUser.getName());
             user.setEmail(updatedUser.getEmail());
             user.setPassword(updatedUser.getPassword());
-            user.setRole(updatedUser.getRole());
+            //user.setRole(updatedUser.getRole());
             userRepository.save(user);
             return true;
         }
