@@ -7,7 +7,6 @@ import com.frcDev.NoInflation.user.UserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,11 +63,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean loginUser(UserLoginDto loginDto) {
+    public User loginUser(UserLoginDto loginDto) {
         Optional<User> userOptional = userRepository.findByEmail(loginDto.getEmail());
         if (userOptional.isPresent() && passwordEncoder.matches(loginDto.getPassword(), userOptional.get().getPassword())) {
-            return true;
+            return userOptional.get();
         }
-        return false;
+        return null;
     }
 }

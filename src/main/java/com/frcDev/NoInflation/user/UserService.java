@@ -12,5 +12,5 @@ public interface UserService {
 
     void registerUser(User user);
 
-    boolean loginUser(UserLoginDto loginDto);
+    User loginUser(UserLoginDto loginDto);
 }

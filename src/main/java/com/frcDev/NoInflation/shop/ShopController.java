@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/shops")
 public class ShopController {
@@ -16,6 +16,7 @@ public class ShopController {
     public ShopController(ShopService shopService) {
         this.shopService = shopService;
     }
+
 
     @GetMapping
     public List<Shop> getAllShops() {
