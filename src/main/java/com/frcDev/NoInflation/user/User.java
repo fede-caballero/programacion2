@@ -15,7 +15,7 @@ public class User {
     private String name;
     private String email;
     private String password;
-    //private String role;
+    private String role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -30,7 +30,7 @@ public class User {
         this.name = name;
         this.email = email;
         this.password = password;
-        //this.role = role;
+        this.role = role;
     }
 
     // Getters y setters
@@ -67,13 +67,13 @@ public class User {
         this.password = password;
     }
 
-    //public String getRole() {
-        //return role;
-    //}
+    public String getRole() {
+        return role;
+    }
 
-    //public void setRole(String role) {
-        //this.role = role;
-    //}
+    public void setRole(String role) {
+        this.role = role;
+    }
 
     public List<ShoppingList> getShoppingLists() {
         return shoppingLists;
