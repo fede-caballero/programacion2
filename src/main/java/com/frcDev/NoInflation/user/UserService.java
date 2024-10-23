@@ -13,4 +13,6 @@ public interface UserService {
     void registerUser(User user);
 
     User loginUser(UserLoginDto loginDto);
+
+    User findByEmail(String userEmail);
 }

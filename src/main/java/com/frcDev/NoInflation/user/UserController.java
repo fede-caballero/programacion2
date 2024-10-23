@@ -2,6 +2,8 @@ package com.frcDev.NoInflation.user;
 
 import com.frcDev.NoInflation.dto.UserLoginDto;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.Claims;
+
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -37,14 +40,12 @@ public class UserController {
         return ResponseEntity.ok(userService.findAll());
     }
 
-    @CrossOrigin(origins = "*")
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody User user) {
         userService.registerUser(user);
         return ResponseEntity.ok("User registered successfully");
     }
 
-    @CrossOrigin(origins = "*")
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody UserLoginDto loginDto) {
         User authenticatedUser = userService.loginUser(loginDto);
@@ -63,7 +64,7 @@ public class UserController {
         }
     }
 
-
+/*
     private String generateToken(User user) {
         long expirationTime = 1000 * 60 * 60 * 10; // 10 horas
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
@@ -75,6 +76,7 @@ public class UserController {
                 .signWith(SignatureAlgorithm.HS256, Keys.hmacShaKeyFor(SECRET.getBytes()))
                 .compact();
     }
+    */
     @GetMapping("/{id}")
     public  ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
@@ -91,6 +93,41 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+        try {
+            User existingUser = userService.getUserById(id);
+            if (existingUser == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Usuario no encontrado"));
+            }
+
+            // Actualizar solo los campos proporcionados
+            if (updatedUser.getName() != null) {
+                existingUser.setName(updatedUser.getName());
+            }
+            if (updatedUser.getEmail() != null) {
+                existingUser.setEmail(updatedUser.getEmail());
+            }
+            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+                existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+            }
+
+            boolean updated = userService.updateUser(id, existingUser);
+            if (updated) {
+                return ResponseEntity.ok(Map.of("message", "Usuario actualizado correctamente"));
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "No se pudo actualizar el usuario"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al actualizar el usuario: " + e.getMessage()));
+        }
+    }
+
+    /*
     @PutMapping("/{id}")
     public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
         User existingUser = userService.getUserById(id);
@@ -109,6 +146,63 @@ public class UserController {
         if (updated)
             return new ResponseEntity<>("User updated successfully", HttpStatus.OK);
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+    }*/
+
+    // Codigo agregado para current user
+    @GetMapping("/current")
+    public ResponseEntity<?> getCurrentUser(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        try {
+            // Validar header
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Token no válido o no proporcionado"));
+            }
+
+            // Extraer y validar token
+            String token = authHeader.substring(7);
+            Claims claims = validateToken(token);
+            if (claims == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Token inválido"));
+            }
+
+            // Buscar usuario
+            User user = userService.findByEmail(claims.getSubject());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Usuario no encontrado"));
+            }
+
+            return ResponseEntity.ok(user);
+
+        } catch (Exception e) {
+            System.out.println("Error en getCurrentUser: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al procesar la solicitud"));
+        }
+    }
+
+    private Claims validateToken(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(SECRET.getBytes()))
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    private String generateToken(User user) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + (1000 * 60 * 60 * 10)); // 10 horas
+
+        return Jwts.builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(now)
+                .setExpiration(expiration)
+                .signWith(SignatureAlgorithm.HS256, Keys.hmacShaKeyFor(SECRET.getBytes()))
+                .compact();
     }
 
 }
