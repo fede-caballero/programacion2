@@ -22,6 +22,20 @@ public class Product {
     @JoinColumn(name = "shop_id", nullable = false)
     private Shop shop;
 
+    public void setShopById(Long shopId) {
+        if (this.shop == null) {
+            this.shop = new Shop();
+        }
+        this.shop.setId(shopId);
+    }
+
+    public boolean isValid() {
+        return productName != null && !productName.trim().isEmpty() &&
+                description != null && !description.trim().isEmpty() &&
+                price != null && price > 0 &&
+                shop != null && shop.getId() != null;
+    }
+
     // Default constructor
     public Product() {
     }

@@ -1,6 +1,7 @@
 package com.frcDev.NoInflation.user;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.frcDev.NoInflation.shop.Shop;
 import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
 
@@ -20,6 +21,14 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<ShoppingList> shoppingLists;
+
+
+
+    // Relación uno a uno con la tienda agregada
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "shop_id")
+    private Shop shop;
+
 
     public User() {
         // Constructor por defecto
@@ -81,5 +90,13 @@ public class User {
 
     public void setShoppingList(List<ShoppingList> shoppingLists) {
         this.shoppingLists = shoppingLists;
+    }
+
+    public Shop getShop() {
+        return shop;
+    }
+
+    public void setShop(Shop shop) {
+        this.shop = shop;
     }
 }

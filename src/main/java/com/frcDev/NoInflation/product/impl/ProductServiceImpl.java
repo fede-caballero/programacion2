@@ -3,7 +3,10 @@ package com.frcDev.NoInflation.product.impl;
 import com.frcDev.NoInflation.product.Product;
 import com.frcDev.NoInflation.product.ProductRepository;
 import com.frcDev.NoInflation.product.ProductService;
+import com.frcDev.NoInflation.shop.Shop;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import com.frcDev.NoInflation.shop.ShopRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,9 +15,11 @@ import java.util.Optional;
 public class ProductServiceImpl implements ProductService {
     //private List<Product> products = new ArrayList<>();
     ProductRepository productRepository;
+    private final ShopRepository shopRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ShopRepository shopRepository) {
         this.productRepository = productRepository;
+        this.shopRepository = shopRepository;
     }
 
     @Override
@@ -24,6 +29,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void createProduct(Product product){
+        if (!product.isValid()) {
+            throw new IllegalArgumentException("Informacion del producto incompleta o invalida");
+        }
+
+        Shop shop = shopRepository.findById(product.getShop().getId())
+                        .orElseThrow(() -> new EntityNotFoundException("No se encontro la tienda con id:" +product.getShop().getId()));
         productRepository.save(product);
     }
 
@@ -56,6 +67,11 @@ public class ProductServiceImpl implements ProductService {
             return false;
         }
 
+    }
+
+    @Override
+    public List<Product> getProductsByShopId(Long shopId) {
+        return productRepository.findByShopId(shopId);
     }
 
 }

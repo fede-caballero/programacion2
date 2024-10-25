@@ -1,5 +1,6 @@
 package com.frcDev.NoInflation.user;
 
+import com.frcDev.NoInflation.dto.LoginResponseDto;
 import com.frcDev.NoInflation.dto.UserLoginDto;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
@@ -46,6 +47,10 @@ public class UserController {
         return ResponseEntity.ok("User registered successfully");
     }
 
+
+    // Codigo comentado de Login para agregar uno alternativo
+    /*
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody UserLoginDto loginDto) {
         User authenticatedUser = userService.loginUser(loginDto);
@@ -62,21 +67,44 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error during login: " + e.getMessage());
         }
+    } */
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUser(@RequestBody UserLoginDto loginDto) {
+        try {
+            User authenticatedUser = userService.loginUser(loginDto);
+
+            if (authenticatedUser != null) {
+                String token = generateToken(authenticatedUser);
+
+                LoginResponseDto response = new LoginResponseDto();
+                response.setUserId(authenticatedUser.getUserId());
+                response.setName(authenticatedUser.getName());
+                response.setEmail(authenticatedUser.getEmail());
+                response.setRole(authenticatedUser.getRole());
+                response.setToken(token);
+
+                // Si el usuario es tipo COMMERCE y tiene una tienda asociada, incluimos sus datos
+                if (authenticatedUser.getRole().equals("COMMERCE") && authenticatedUser.getShop() != null) {
+                    LoginResponseDto.ShopDto shopDto = new LoginResponseDto.ShopDto(
+                            authenticatedUser.getShop().getId(),
+                            authenticatedUser.getShop().getShopName(),
+                            authenticatedUser.getShop().getLocation()
+                    );
+                    response.setShop(shopDto);
+                }
+
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("Credenciales inválidas");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error durante el login: " + e.getMessage());
+        }
     }
 
-/*
-    private String generateToken(User user) {
-        long expirationTime = 1000 * 60 * 60 * 10; // 10 horas
-        Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
-
-        return Jwts.builder()
-                .setSubject(user.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS256, Keys.hmacShaKeyFor(SECRET.getBytes()))
-                .compact();
-    }
-    */
     @GetMapping("/{id}")
     public  ResponseEntity<User> getUserById(@PathVariable Long id) {
         User user = userService.getUserById(id);
@@ -127,26 +155,6 @@ public class UserController {
         }
     }
 
-    /*
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
-        User existingUser = userService.getUserById(id);
-        if (existingUser == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        existingUser.setName(updatedUser.getName());
-        existingUser.setEmail(updatedUser.getEmail());
-
-        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
-        }
-
-        boolean updated = userService.updateUser(id, existingUser);
-        if (updated)
-            return new ResponseEntity<>("User updated successfully", HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-    }*/
 
     // Codigo agregado para current user
     @GetMapping("/current")
