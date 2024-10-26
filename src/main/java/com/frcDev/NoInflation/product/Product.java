@@ -14,6 +14,10 @@ public class Product {
     private Double price;
     private String location;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductCategory category;
+
     @ManyToOne
     @JoinColumn(name = "shopping_list_id")
     private ShoppingList shoppingList;
@@ -33,7 +37,8 @@ public class Product {
         return productName != null && !productName.trim().isEmpty() &&
                 description != null && !description.trim().isEmpty() &&
                 price != null && price > 0 &&
-                shop != null && shop.getId() != null;
+                shop != null && shop.getId() != null &&
+                category != null;
     }
 
     // Default constructor
@@ -41,13 +46,15 @@ public class Product {
     }
 
     // Constructor with parameters
-    public Product(Long productId, String productName, String description, Double price, String location, Shop shop) {
+    public Product(Long productId, String productName, String description,
+                   Double price, String location, Shop shop, ProductCategory category) {
         this.productId = productId;
         this.productName = productName;
         this.description = description;
         this.price = price;
         this.location = location;
         this.shop = shop;
+        this.category = category;
     }
 
     // Getters and Setters
@@ -97,5 +104,21 @@ public class Product {
 
     public void setShop(Shop shop) {
         this.shop = shop;
+    }
+
+    public ProductCategory getCategory() {
+        return category;
+    }
+
+    public void setCategory(ProductCategory category) {
+        this.category = category;
+    }
+
+    public ShoppingList getShoppingList() {
+        return shoppingList;
+    }
+
+    public void setShoppingList(ShoppingList shoppingList) {
+        this.shoppingList = shoppingList;
     }
 }
