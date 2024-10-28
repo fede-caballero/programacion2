@@ -1,5 +1,6 @@
 package com.frcDev.NoInflation.product;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.frcDev.NoInflation.shop.Shop;
 import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
@@ -20,10 +21,12 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "shopping_list_id")
+    @JsonIgnoreProperties("products")
     private ShoppingList shoppingList;
 
     @ManyToOne
     @JoinColumn(name = "shop_id", nullable = false)
+    @JsonIgnoreProperties({"products", "user"})
     private Shop shop;
 
     public void setShopById(Long shopId) {

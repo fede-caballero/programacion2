@@ -1,13 +1,17 @@
 package com.frcDev.NoInflation.product;
 import java.util.List;
 
+import com.frcDev.NoInflation.dto.ProductDTO;
+import com.frcDev.NoInflation.shop.Shop;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/products")
+@CrossOrigin(origins = "*")
 public class ProductController {
     private final ProductService productService;
 
@@ -15,53 +19,37 @@ public class ProductController {
         this.productService = productService;
     }
 
+
     @GetMapping
     public ResponseEntity<List<Product>> findAll(){
         return ResponseEntity.ok(productService.findAll());
     }
 
-    /*
-    @CrossOrigin(origins = "http://localhost:8081")
     @PostMapping
-    public ResponseEntity<String> createProduct(@RequestBody Product product){
-        productService.createProduct(product);
-        return new ResponseEntity<>("Product added successfully", HttpStatus.CREATED);
-    }
-    */
-    // Nuevo createProduct
-    @CrossOrigin(origins = "*")
-    @PostMapping
-    public ResponseEntity<String> createProduct(@RequestBody Product product) {
-        System.out.println("Received request body: " + product);
-        System.out.println("Product name: " + product.getProductName());
-        System.out.println("Shop info: " + (product.getShop() != null ? "ID: " + product.getShop().getId() : "null"));
+    public ResponseEntity<String> createProduct(@RequestBody ProductDTO productDTO) {
         try {
-            // Log para debugging
-            System.out.println("Received product data: " + product);
-            System.out.println("Shop ID: " + (product.getShop() != null ? product.getShop().getId() : "null"));
+            // Convertir DTO a entidad
+            Product product = new Product();
+            product.setProductName(productDTO.getProductName());
+            product.setDescription(productDTO.getDescription());
+            product.setPrice(productDTO.getPrice());
+            product.setLocation(productDTO.getLocation());
+            product.setCategory(productDTO.getCategory());
 
-            if (product.getShop() == null || product.getShop().getId() == null) {
-                return new ResponseEntity<>("Se requiere información de la tienda", HttpStatus.BAD_REQUEST);
-            }
+            Shop shop = new Shop();
+            shop.setId(productDTO.getShop().getId());
+            product.setShop(shop);
 
             productService.createProduct(product);
             return new ResponseEntity<>("Producto creado exitosamente", HttpStatus.CREATED);
-
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Error en los datos del producto: " + e.getMessage(),
-                    HttpStatus.BAD_REQUEST);
-        } catch (EntityNotFoundException e) {
-            return new ResponseEntity<>("Error: " + e.getMessage(),
-                    HttpStatus.NOT_FOUND);
         } catch (Exception e) {
-            System.err.println("Error creating product: " + e.getMessage());
             e.printStackTrace();
-            return new ResponseEntity<>("Error interno del servidor: " + e.getMessage(),
+            return new ResponseEntity<>("Error al crear producto: " + e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
-    @GetMapping("/{id}")
+        @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
         if (product != null)

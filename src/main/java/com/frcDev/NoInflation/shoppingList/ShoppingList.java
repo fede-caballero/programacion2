@@ -1,6 +1,7 @@
 package com.frcDev.NoInflation.shoppingList;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.frcDev.NoInflation.product.Product;
 import com.frcDev.NoInflation.product.ProductController;
 import jakarta.persistence.*;
@@ -23,8 +24,9 @@ public class ShoppingList {
     @JsonBackReference
     private User user;
 
+    @JsonManagedReference
     @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ShoppingListItem> items;
+    private List<ShoppingListItem> items = new ArrayList<>();
 
     // Constructor sin parámetros (obligatorio para JPA)
     public ShoppingList() {

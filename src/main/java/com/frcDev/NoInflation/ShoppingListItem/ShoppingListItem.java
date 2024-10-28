@@ -1,15 +1,17 @@
 package com.frcDev.NoInflation.ShoppingListItem;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.frcDev.NoInflation.product.Product;
 import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
 
 @Entity
+@Table(name = "shopping_list_item")
 public class ShoppingListItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "shopping_list_item_seq")
-    @SequenceGenerator(name = "shopping_list_item_seq", sequenceName = "shopping_list_item_seq", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Cambiado a IDENTITY
     private Long id;
     private String itemName;
     private Integer quantity;
@@ -20,8 +22,10 @@ public class ShoppingListItem {
     private ShoppingList shoppingList;
 
     @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
+    @JoinColumn(name = "product_id")
     private Product product;
+
+
 
     // Builder
     public ShoppingListItem() {
@@ -35,6 +39,7 @@ public class ShoppingListItem {
         this.shoppingList = shoppingList;
         this.product = product;
     }
+
 
     public Long getId() {
         return id;
@@ -74,5 +79,24 @@ public class ShoppingListItem {
 
     public void setShoppingList(ShoppingList shoppingList) {
         this.shoppingList = shoppingList;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
+    @Override
+    public String toString() {
+        return "ShoppingListItem{" +
+                "id=" + id +
+                ", itemName='" + itemName + '\'' +
+                ", quantity=" + quantity +
+                ", notes='" + notes + '\'' +
+                ", shoppingList=" + (shoppingList != null ? shoppingList.getId() : "null") +
+                ", product=" + (product != null ? product.getProductId() : "null") +
+                '}';
     }
 }
