@@ -18,4 +18,5 @@ public interface ShoppingListService {
     ShoppingListItem addItemToList(Long userId, Long listId, ShoppingListItem newItem);
     boolean removeItemFromList(Long userId, Long listId, Long itemId);
 
+    boolean updateItemQuantity(Long userId, Long listId, Long itemId, Integer quantity);
 }

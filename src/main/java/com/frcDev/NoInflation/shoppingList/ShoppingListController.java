@@ -7,6 +7,7 @@ import com.frcDev.NoInflation.product.ProductService;
 import com.frcDev.NoInflation.user.User;
 import com.frcDev.NoInflation.user.UserService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -44,22 +45,51 @@ public class ShoppingListController {
     }
 
     @GetMapping("/{shoppingListId}")
-    public ResponseEntity<ShoppingList> getShoppingListById(@PathVariable Long userId, @PathVariable Long shoppingListId) {
-        ShoppingList shoppingList = shoppingListService.getShoppingListByIdAndUser(shoppingListId, userId);
-        if (shoppingList != null)
-            return new ResponseEntity<>(shoppingList, HttpStatus.OK);
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> getShoppingListById(@PathVariable Long userId, @PathVariable Long shoppingListId) {
+        try {
+            ShoppingList shoppingList = shoppingListService.getShoppingListByIdAndUser(shoppingListId, userId);
+            if (shoppingList == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(new ShoppingListDTO(shoppingList));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al obtener la lista de compras: " + e.getMessage()));
+        }
     }
 
-    @PostMapping
-    public ResponseEntity<String> createShoppingList(@PathVariable Long userId, @RequestBody ShoppingList shoppingList) {
-        User user = userService.getUserById(userId);
-        if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+    @PostMapping(
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> createShoppingList(
+            @PathVariable Long userId,
+            @RequestBody ShoppingList shoppingList) {
+        try {
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Usuario no encontrado"));
+            }
+
+            // Validar datos recibidos
+            if (shoppingList.getListName() == null || shoppingList.getListName().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "El nombre de la lista es requerido"));
+            }
+
+            shoppingList.setUser(user);
+            ShoppingList created = shoppingListService.createShoppingList(shoppingList);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(Map.of(
+                            "message", "Lista de compras creada exitosamente",
+                            "shoppingList", new ShoppingListDTO(created)
+                    ));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al crear la lista de compras: " + e.getMessage()));
         }
-        shoppingList.setUser(user);
-        shoppingListService.createShoppingList(shoppingList);
-        return new ResponseEntity<>("Shopping list created", HttpStatus.CREATED);
     }
 
     @PutMapping("/{shoppingListId}")
@@ -117,8 +147,34 @@ public class ShoppingListController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Item no encontrado"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error al eliminar item: " + e.getMessage()));
         }
     }
+
+    @PatchMapping("/{listId}/items/{itemId}")
+    public ResponseEntity<?> updateItemQuantity(
+            @PathVariable Long userId,
+            @PathVariable Long listId,
+            @PathVariable Long itemId,
+            @RequestBody Map<String, Integer> request) {
+        try {
+            Integer quantity = request.get("quantity");
+            if (quantity == null || quantity < 1) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Cantidad inválida"));
+            }
+
+            boolean updated = shoppingListService.updateItemQuantity(userId, listId, itemId, quantity);
+            if (updated) {
+                return ResponseEntity.ok(Map.of("message", "Cantidad actualizada correctamente"));
+            }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Item no encontrado"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al actualizar cantidad: " + e.getMessage()));
+        }
+    }
+
 }

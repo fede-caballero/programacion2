@@ -1,6 +1,7 @@
 package com.frcDev.NoInflation.shop;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.frcDev.NoInflation.product.Product;
 import jakarta.persistence.*;
 
@@ -14,8 +15,8 @@ public class Shop {
     private String shopName;
     private String location;
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "shop", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "shop")
+    @JsonIgnoreProperties("shop")
     private List<Product> products;
 
     //private List<Price> prices;

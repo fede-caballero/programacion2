@@ -1,6 +1,7 @@
 package com.frcDev.NoInflation.shoppingList;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.frcDev.NoInflation.product.Product;
 import com.frcDev.NoInflation.product.ProductController;
@@ -21,12 +22,12 @@ public class ShoppingList {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties("shoppingLists")
     private User user;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ShoppingListItem> items = new ArrayList<>();
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("shoppingList")
+    private List<ShoppingListItem> items;
 
     // Constructor sin parámetros (obligatorio para JPA)
     public ShoppingList() {

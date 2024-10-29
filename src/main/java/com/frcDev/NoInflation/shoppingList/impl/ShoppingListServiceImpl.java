@@ -155,4 +155,16 @@ public class ShoppingListServiceImpl implements ShoppingListService {
         shoppingListItemRepository.deleteById(itemId);
         return true;
     }
+
+    @Override
+    public boolean updateItemQuantity(Long userId, Long listId, Long itemId, Integer quantity) {
+        return shoppingListItemRepository.findById(itemId)
+                .filter(item -> item.getShoppingList().getId().equals(listId))
+                .map(item -> {
+                    item.setQuantity(quantity);
+                    shoppingListItemRepository.save(item);
+                    return true;
+                })
+                .orElse(false);
+    }
 }

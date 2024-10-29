@@ -11,20 +11,22 @@ import jakarta.persistence.*;
 public class ShoppingListItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // Cambiado a IDENTITY
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String itemName;
     private Integer quantity;
     private String notes;
 
     @ManyToOne
-    @JoinColumn(name = "shopping_list_id", nullable = false)
+    @JoinColumn(name = "shopping_list_id")
+    @JsonIgnoreProperties("items")
     private ShoppingList shoppingList;
 
     @ManyToOne
     @JoinColumn(name = "product_id")
+    @JsonIgnoreProperties({"shoppingList", "shoppingListItem"})
     private Product product;
-
 
 
     // Builder
