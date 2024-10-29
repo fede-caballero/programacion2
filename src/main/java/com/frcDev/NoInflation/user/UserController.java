@@ -167,11 +167,18 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@RequestBody UserLoginDto loginDto) {
         try {
+            // Log para debugging
+            System.out.println("Login attempt for email: " + loginDto.getEmail());
+
             User authenticatedUser = userService.loginUser(loginDto);
 
             if (authenticatedUser != null) {
                 String token = generateToken(authenticatedUser);
+                if (token == null || token.isEmpty()) {
+                    throw new Exception("Token generation failed");
+                }
 
+                // Preparar el objeto de respuesta con datos del usuario y token
                 LoginResponseDto response = new LoginResponseDto();
                 response.setUserId(authenticatedUser.getUserId());
                 response.setName(authenticatedUser.getName());
@@ -179,8 +186,8 @@ public class UserController {
                 response.setRole(authenticatedUser.getRole());
                 response.setToken(token);
 
-                // Si el usuario es tipo COMMERCE y tiene una tienda asociada, incluimos sus datos
-                if (authenticatedUser.getRole().equals("COMMERCE") && authenticatedUser.getShop() != null) {
+                // Incluir datos de tienda si el usuario es COMMERCE
+                if ("COMMERCE".equals(authenticatedUser.getRole()) && authenticatedUser.getShop() != null) {
                     LoginResponseDto.ShopDto shopDto = new LoginResponseDto.ShopDto(
                             authenticatedUser.getShop().getId(),
                             authenticatedUser.getShop().getShopName(),
@@ -189,16 +196,21 @@ public class UserController {
                     response.setShop(shopDto);
                 }
 
+                System.out.println("Login successful for user: " + authenticatedUser.getEmail());
                 return ResponseEntity.ok(response);
             } else {
+                System.out.println("Login failed: Invalid credentials");
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Credenciales inválidas");
+                        .body(Map.of("error", "Credenciales inválidas"));
             }
         } catch (Exception e) {
+            System.out.println("Login error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error durante el login: " + e.getMessage());
+                    .body(Map.of("error", "Error durante el login: " + e.getMessage()));
         }
     }
+
+
 
     @GetMapping("/{id}")
     public  ResponseEntity<User> getUserById(@PathVariable Long id) {

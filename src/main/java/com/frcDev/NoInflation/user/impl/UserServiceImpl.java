@@ -82,12 +82,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User loginUser(UserLoginDto loginDto) {
-        Optional<User> userOptional = userRepository.findByEmail(loginDto.getEmail());
-        if (userOptional.isPresent() && passwordEncoder.matches(loginDto.getPassword(), userOptional.get().getPassword())) {
-            return userOptional.get();
+        try {
+            Optional<User> userOptional = userRepository.findByEmail(loginDto.getEmail().toLowerCase());
+
+            if (userOptional.isPresent()) {
+                User user = userOptional.get();
+                if (passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
+                    return user;
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            System.out.println("Error in loginUser service: " + e.getMessage());
+            throw e;
         }
-        return null;
     }
+
 
     @Override
     public User findByEmail(String userEmail) {
