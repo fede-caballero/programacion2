@@ -3,6 +3,7 @@ package com.frcDev.NoInflation.user;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.frcDev.NoInflation.shop.Shop;
 import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
@@ -19,33 +20,57 @@ public class User {
     private Long id;
     private String name;
     private String email;
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
     private String role;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @PrePersist
+    @PreUpdate
+    private void prePersist() {
+        if (email != null) {
+            email = email.toLowerCase().trim();
+        }
+        if (name != null) {
+            name = name.trim();
+        }
+    }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties({"user", "hibernateLazyInitializer", "handler"})
     private List<ShoppingList> shoppingLists = new ArrayList<>();
 
 
 
     // Relación uno a uno con la tienda agregada
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "shop_id")
     private Shop shop;
 
 
     public User() {
-        // Constructor por defecto
+        this.shoppingLists = new ArrayList<>();
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", role='" + role + '\'' +
+                ", passwordPresent=" + (password != null) +
+                '}';
     }
 
     public User(Long id, String name, String email, String password, String role) {
         this.id = id;
         this.name = name;
-        this.email = email;
+        this.email = email.toLowerCase().trim();
         this.password = password;
         this.role = role;
+        this.shoppingLists = new ArrayList<>();
     }
+
 
     // Getters y setters
 
@@ -73,10 +98,12 @@ public class User {
         this.email = email;
     }
 
+    @JsonIgnore
     public String getPassword() {
         return password;
     }
 
+    @JsonProperty("password")
     public void setPassword(String password) {
         this.password = password;
     }

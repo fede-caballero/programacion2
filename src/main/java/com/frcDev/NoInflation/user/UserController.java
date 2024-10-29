@@ -2,6 +2,7 @@ package com.frcDev.NoInflation.user;
 
 import com.frcDev.NoInflation.dto.LoginResponseDto;
 import com.frcDev.NoInflation.dto.UserLoginDto;
+import com.frcDev.NoInflation.shop.Shop;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 
@@ -18,9 +19,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE})
 public class UserController {
 
     private static final String SECRET = "your-very-secure-and-long-secret-key";
@@ -41,14 +42,108 @@ public class UserController {
         return ResponseEntity.ok(userService.findAll());
     }
 
+    @GetMapping("/test-connection")
+    public ResponseEntity<String> testConnection() {
+        return ResponseEntity.ok("Backend connection successful");
+    }
+
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
-        userService.registerUser(user);
-        return ResponseEntity.ok("User registered successfully");
+    public ResponseEntity<?> registerUser(@RequestBody User user) {
+        try {
+            // Agregar logs detallados
+            System.out.println("Received registration request");
+            System.out.println("Email: " + user.getEmail());
+            System.out.println("Name: " + user.getName());
+            System.out.println("Role: " + user.getRole());
+            System.out.println("Password present: " + (user.getPassword() != null));
+
+            // Validaciones mejoradas
+            if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+                System.out.println("Password validation failed");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "La contraseña es requerida"));
+            }
+
+            // Validar otros campos requeridos
+            if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "El email es requerido"));
+            }
+
+            if (user.getName() == null || user.getName().trim().isEmpty()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "El nombre es requerido"));
+            }
+
+            // Normalizar y validar datos
+            user.setEmail(user.getEmail().toLowerCase().trim());
+            user.setName(user.getName().trim());
+
+            // Log antes de encriptar la contraseña
+            System.out.println("About to encode password");
+
+            // Encriptar contraseña
+            String rawPassword = user.getPassword();
+            String encodedPassword = passwordEncoder.encode(rawPassword);
+            user.setPassword(encodedPassword);
+
+            System.out.println("Password encoded successfully");
+
+            // Registrar usuario
+            User registeredUser = userService.registerUser(user);
+            System.out.println("User registered successfully with ID: " + registeredUser.getUserId());
+
+            // Preparar respuesta
+            Map<String, Object> response = new HashMap<>();
+            response.put("userId", registeredUser.getUserId());
+            response.put("email", registeredUser.getEmail());
+            response.put("name", registeredUser.getName());
+            response.put("role", registeredUser.getRole());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Registration error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al registrar usuario: " + e.getMessage()));
+        }
+    }
+
+    private void validateUserData(User user) {
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("La contraseña es requerida");
+        }
+        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("El email es requerido");
+        }
+        if (user.getName() == null || user.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre es requerido");
+        }
+        if (user.getRole() == null || user.getRole().trim().isEmpty()) {
+            throw new IllegalArgumentException("El rol es requerido");
+        }
+        if (!user.getRole().equals("BUYER") && !user.getRole().equals("COMMERCE")) {
+            throw new IllegalArgumentException("Rol inválido");
+        }
+    }
+
+    private void validateShopData(Shop shop) {
+        if (shop == null) {
+            throw new IllegalArgumentException("Información de tienda requerida para comercios");
+        }
+        if (shop.getShopName() == null || shop.getShopName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre de la tienda es requerido");
+        }
+        if (shop.getLocation() == null || shop.getLocation().trim().isEmpty()) {
+            throw new IllegalArgumentException("La ubicación de la tienda es requerida");
+        }
     }
 
 
-    // Codigo comentado de Login para agregar uno alternativo
+
+
+// Codigo comentado de Login para agregar uno alternativo
     /*
 
     @PostMapping("/login")

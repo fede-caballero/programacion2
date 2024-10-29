@@ -10,7 +10,7 @@ public interface UserService {
     boolean updateUser(Long id, User updatedUser);
     boolean deleteUserById(Long id);
 
-    void registerUser(User user);
+    User registerUser(User user);
 
     User loginUser(UserLoginDto loginDto);
 

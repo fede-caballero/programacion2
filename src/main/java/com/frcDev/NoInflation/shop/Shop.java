@@ -3,6 +3,7 @@ package com.frcDev.NoInflation.shop;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.frcDev.NoInflation.product.Product;
+import com.frcDev.NoInflation.user.User;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -56,6 +57,8 @@ public class Shop {
 
     public void setProducts(List<Product> products) {
         this.products = products;
+    }
+    public void setUser(User user) {
     }
 }
 
