@@ -50,20 +50,12 @@ public class ShoppingListServiceImpl implements ShoppingListService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public void createShoppingList(ShoppingList shoppingList) {
-        if (shoppingList.getListName() == null || shoppingList.getListName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre de la lista es requerido");
-        }
-        if (shoppingList.getUser() == null) {
-            throw new IllegalArgumentException("El usuario es requerido");
-        }
-
+    @Transactional
+    public ShoppingList createShoppingList(ShoppingList shoppingList) {
         if (shoppingList.getItems() == null) {
             shoppingList.setItems(new ArrayList<>());
         }
-
-        shoppingListRepository.save(shoppingList);
+        return shoppingListRepository.save(shoppingList);
     }
 
     @Override

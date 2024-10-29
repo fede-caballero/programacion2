@@ -7,6 +7,7 @@ import com.frcDev.NoInflation.shoppingList.ShoppingList;
 import jakarta.persistence.*;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Table(name = "shopping_list_item")
 public class ShoppingListItem {
 
@@ -18,14 +19,14 @@ public class ShoppingListItem {
     private Integer quantity;
     private String notes;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shopping_list_id")
-    @JsonIgnoreProperties("items")
+    @JsonIgnoreProperties({"items", "user", "hibernateLazyInitializer", "handler"})
     private ShoppingList shoppingList;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
-    @JsonIgnoreProperties({"shoppingList", "shoppingListItem"})
+    @JsonIgnoreProperties({"shoppingListItems", "hibernateLazyInitializer", "handler"})
     private Product product;
 
 

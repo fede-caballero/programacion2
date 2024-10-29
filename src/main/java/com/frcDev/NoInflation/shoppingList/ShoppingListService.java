@@ -7,7 +7,7 @@ public interface ShoppingListService {
     // Métodos para ShoppingList
     List<ShoppingList> getAllShoppingLists();
     List<ShoppingList> getAllShoppingListsByUser(Long userId);
-    void createShoppingList(ShoppingList shoppingList);
+    ShoppingList createShoppingList(ShoppingList shoppingList);
     ShoppingList getShoppingListById(Long shoppingListId);
     ShoppingList getShoppingListByIdAndUser(Long shoppingListId, Long userId);
     boolean updateShoppingList(ShoppingList shoppingList, Long shoppingListId, Long userId);

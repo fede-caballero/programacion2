@@ -1,8 +1,6 @@
 package com.frcDev.NoInflation.shoppingList;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import com.frcDev.NoInflation.product.Product;
 import com.frcDev.NoInflation.product.ProductController;
 import jakarta.persistence.*;
@@ -13,6 +11,7 @@ import java.util.List;
 import com.frcDev.NoInflation.ShoppingListItem.ShoppingListItem;
 
 @Entity
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ShoppingList {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,23 +19,25 @@ public class ShoppingList {
     private String listName;
     private String description;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonIgnoreProperties("shoppingLists")
+    @JsonIgnoreProperties({"shoppingLists", "hibernateLazyInitializer", "handler"})
     private User user;
 
-    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL)
-    @JsonIgnoreProperties("shoppingList")
-    private List<ShoppingListItem> items;
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties({"shoppingList", "hibernateLazyInitializer", "handler"})
+    private List<ShoppingListItem> items = new ArrayList<>();
 
     // Constructor sin parámetros (obligatorio para JPA)
     public ShoppingList() {
+        this.items = new ArrayList<>();
     }
 
     // Constructor con parámetros
     public ShoppingList(String listName, String description) {
         this.listName = listName;
         this.description = description;
+        this.items = new ArrayList<>();
     }
 
     // Getters y setters

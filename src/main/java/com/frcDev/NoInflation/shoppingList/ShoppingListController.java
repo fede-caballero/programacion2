@@ -64,31 +64,26 @@ public class ShoppingListController {
     )
     public ResponseEntity<?> createShoppingList(
             @PathVariable Long userId,
-            @RequestBody ShoppingList shoppingList) {
+            @RequestBody ShoppingList shoppingList
+    ) {
         try {
             User user = userService.getUserById(userId);
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Usuario no encontrado"));
-            }
-
-            // Validar datos recibidos
-            if (shoppingList.getListName() == null || shoppingList.getListName().trim().isEmpty()) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("error", "El nombre de la lista es requerido"));
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body("{\"error\": \"Usuario no encontrado\"}");
             }
 
             shoppingList.setUser(user);
             ShoppingList created = shoppingListService.createShoppingList(shoppingList);
 
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(Map.of(
-                            "message", "Lista de compras creada exitosamente",
-                            "shoppingList", new ShoppingListDTO(created)
-                    ));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(created);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Error al crear la lista de compras: " + e.getMessage()));
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("{\"error\": \"" + e.getMessage() + "\"}");
         }
     }
 
